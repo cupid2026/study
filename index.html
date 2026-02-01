@@ -1,0 +1,2295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>寒假计划时间表 - 马卡龙色系（半小时间隔，优化布局）</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f9f7f7;
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(255, 182, 193, 0.2);
+            padding: 30px;
+            overflow: hidden;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px dashed #ffb6c1;
+        }
+        
+        h1 {
+            color: #ff9a9e;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .subtitle {
+            color: #a3d9c9;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        /* 数据状态提示 */
+        .data-status {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+            padding: 8px;
+            border-radius: 8px;
+            background-color: #f0f9ff;
+            border: 1px solid #91d5ff;
+            display: none;
+        }
+        
+        .data-status.show {
+            display: block;
+            animation: fadeInOut 2s ease;
+        }
+        
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        
+        /* 目标区域 - 移动到标题下方 */
+        .goals-section {
+            background-color: #fffaf0;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(255, 215, 150, 0.1);
+        }
+        
+        .goals-section .section-title {
+            color: #ffb347;
+            border-bottom: 2px solid #ffd7a6;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .name-input {
+            width: 200px;
+            padding: 10px 15px;
+            border: 2px solid #ffd7a6;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ff8c00;
+            margin-bottom: 20px;
+            background-color: white;
+        }
+        
+        .goals-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .goal-box {
+            flex: 1;
+            min-width: 200px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 10px rgba(255, 179, 71, 0.1);
+            border-left: 5px solid #ffb347;
+        }
+        
+        .goal-box h3 {
+            color: #ff8c00;
+            margin-bottom: 10px;
+        }
+        
+        .goal-text {
+            width: 100%;
+            padding: 10px;
+            border: 1px dashed #ffd7a6;
+            border-radius: 8px;
+            min-height: 80px;
+            background-color: rgba(255, 247, 231, 0.5);
+            color: #666;
+        }
+        
+        .goal-text:focus {
+            outline: none;
+            border: 1px solid #ffb347;
+            background-color: white;
+        }
+        
+        .sun-icon {
+            color: #ffb347;
+            font-size: 1.5rem;
+            margin-right: 5px;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        /* 时间表区域 - 增大尺寸，移除滚动条 */
+        .timeline-section {
+            flex: 2;
+            min-width: 400px;
+            background-color: #fef6fb;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(255, 182, 193, 0.1);
+            height: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 任务区域 - 移除滚动条，完全显示 */
+        .tasks-section {
+            flex: 1;
+            min-width: 300px;
+            background-color: #f0fdf9;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(163, 217, 201, 0.1);
+            height: auto; /* 改为自动高度 */
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .timeline-section .section-title {
+            color: #ff9a9e;
+            border-bottom: 2px solid #ffccd5;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .tasks-section .section-title {
+            color: #4ecdc4;
+            border-bottom: 2px solid #a3d9c9;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .day-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background-color: white;
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: 0 3px 10px rgba(255, 107, 139, 0.1);
+        }
+        
+        .day-tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px 5px;
+            background-color: #ffebf0;
+            border-radius: 10px;
+            margin: 0 5px;
+            font-weight: 600;
+            color: #ff6b8b;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .day-tab:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(255, 107, 139, 0.2);
+        }
+        
+        .day-tab.active {
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            color: white;
+            border-color: #ff6b8b;
+            box-shadow: 0 5px 10px rgba(255, 107, 139, 0.3);
+        }
+        
+        .current-day-indicator {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: linear-gradient(90deg, #ff9a9e, #fad0c4);
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .current-day-indicator i {
+            margin-right: 10px;
+        }
+        
+        /* 移除时间表的滚动条，改为自动显示全部内容 */
+        .timeline-scroll {
+            flex: 1;
+            overflow: visible;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.7);
+            min-height: 900px;
+        }
+        
+        /* 移除任务区域的滚动条，改为完全显示 */
+        .tasks-scroll {
+            flex: 1;
+            overflow: visible; /* 改为可见，移除滚动条 */
+            padding-right: 0; /* 移除内边距 */
+            min-height: 800px; /* 设置最小高度以确保所有内容都能显示 */
+        }
+        
+        /* 移除所有滚动条样式 */
+        .timeline-scroll::-webkit-scrollbar,
+        .tasks-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .timeline-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+        
+        .timeline-table tr {
+            border-bottom: 1px dashed #ffccd5;
+        }
+        
+        .timeline-table tr:last-child {
+            border-bottom: none;
+        }
+        
+        .timeline-table td {
+            padding: 10px 12px;
+        }
+        
+        .time-cell {
+            width: 120px;
+            color: #ff6b8b;
+            font-weight: 600;
+            vertical-align: top;
+        }
+        
+        .task-cell {
+            position: relative;
+        }
+        
+        .task-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #ffccd5;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #555;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .task-input:focus {
+            outline: none;
+            border-color: #ff9a9e;
+            box-shadow: 0 0 0 3px rgba(255, 154, 158, 0.2);
+            background-color: white;
+            cursor: text;
+        }
+        
+        .task-input.selected {
+            background-color: #e6f7ff;
+            border-color: #1890ff;
+            box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.2);
+        }
+        
+        .task-input.merged {
+            background-color: #f6ffed;
+            border-color: #52c41a;
+            border-top: 1px solid #52c41a;
+            border-bottom: 1px solid #52c41a;
+            border-radius: 0;
+        }
+        
+        .task-input.merged.first {
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            border-top: 2px solid #52c41a;
+        }
+        
+        .task-input.merged.last {
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            border-bottom: 2px solid #52c41a;
+        }
+        
+        .task-input.merged.middle {
+            border-left: 2px solid #52c41a;
+            border-right: 2px solid #52c41a;
+        }
+        
+        .important-tasks {
+            margin-bottom: 25px;
+        }
+        
+        .task-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+        
+        .task-item:hover {
+            transform: translateY(-3px);
+        }
+        
+        .task-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        
+        .task-study {
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+        }
+        
+        .task-exercise {
+            background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+        }
+        
+        .task-content {
+            flex: 1;
+        }
+        
+        .task-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #444;
+        }
+        
+        .task-title-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #c2e9fb;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #444;
+            background-color: #f9fdfe;
+            margin-bottom: 5px;
+        }
+        
+        .task-title-input:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            background-color: white;
+        }
+        
+        .task-desc {
+            color: #777;
+            font-size: 0.9rem;
+        }
+        
+        .task-desc-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e0f7f2;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #777;
+            background-color: #f9fdfe;
+        }
+        
+        .task-desc-input:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            background-color: white;
+        }
+        
+        /* 复选框区域 */
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 12px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .checklist-item input[type="checkbox"] {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .checklist-item label {
+            flex: 1;
+            cursor: pointer;
+        }
+        
+        .checklist-item input[type="text"] {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #e0f7f2;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            color: #444;
+            background-color: #f9fdfe;
+        }
+        
+        .checklist-item input[type="text"]:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            background-color: white;
+        }
+        
+        .add-task-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to right, #a1c4fd, #c2e9fb);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .add-task-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(161, 196, 253, 0.3);
+        }
+        
+        .add-task-btn i {
+            margin-right: 8px;
+        }
+        
+        /* 时间行颜色交替 */
+        .timeline-table tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .timeline-table tr:nth-child(odd) {
+            background-color: rgba(255, 250, 240, 0.3);
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 180px;
+        }
+        
+        .btn-save {
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4);
+        }
+        
+        .btn-print {
+            background: linear-gradient(to right, #a1c4fd, #c2e9fb);
+            color: white;
+            box-shadow: 0 5px 15px rgba(161, 196, 253, 0.4);
+        }
+        
+        .btn-export {
+            background: linear-gradient(to right, #84fab0, #8fd3f4);
+            color: white;
+            box-shadow: 0 5px 15px rgba(132, 250, 176, 0.4);
+        }
+        
+        .btn-clear {
+            background: linear-gradient(to right, #ff7875, #ff9a9e);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 120, 117, 0.4);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        /* 任务合并控制按钮 */
+        .merge-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            border: 1px dashed #ff9a9e;
+        }
+        
+        .merge-btn {
+            padding: 8px 15px;
+            background: linear-gradient(to right, #52c41a, #73d13d);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .merge-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 8px rgba(82, 196, 26, 0.3);
+        }
+        
+        .merge-btn:disabled {
+            background: linear-gradient(to right, #d9d9d9, #bfbfbf);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .merge-info {
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
+            padding: 8px;
+            background-color: #f6ffed;
+            border-radius: 6px;
+            border: 1px solid #b7eb8f;
+            margin-bottom: 15px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px dashed #ddd;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        /* 隐藏所有天的内容，只显示当前激活的天 */
+        .day-content {
+            display: none;
+        }
+        
+        .day-content.active {
+            display: block;
+        }
+        
+        /* 添加一些动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .day-content.active {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @media (max-width: 1200px) {
+            .container {
+                max-width: 100%;
+                padding: 20px;
+            }
+            
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .timeline-section, .tasks-section {
+                height: auto;
+                min-height: 600px;
+            }
+            
+            /* 移动端调整时间表区域高度 */
+            .timeline-scroll {
+                min-height: 700px;
+            }
+            
+            .tasks-scroll {
+                min-height: 600px;
+            }
+            
+            .merge-controls {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .day-navigation {
+                flex-wrap: wrap;
+            }
+            
+            .day-tab {
+                flex: 0 0 calc(33.333% - 10px);
+                margin-bottom: 10px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .goals-container {
+                flex-direction: column;
+            }
+            
+            .time-cell {
+                width: 100px;
+                font-size: 0.85rem;
+            }
+            
+            .task-input {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+            
+            /* 移动端进一步调整时间表区域高度 */
+            .timeline-scroll {
+                min-height: 600px;
+            }
+            
+            .tasks-scroll {
+                min-height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✨ 寒假计划时间表 ✨</h1>
+            <p class="subtitle">马卡龙色系可编辑版本 | 半小时间隔 | 按日切换独立计划表</p>
+            <div class="data-status" id="dataStatus">数据已自动保存</div>
+        </header>
+        
+        <!-- 目标区域 - 移动到标题下方 -->
+        <section class="goals-section">
+            <h2 class="section-title"><i class="fas fa-bullseye"></i> 寒假目标</h2>
+            <input type="text" class="name-input" placeholder="请输入姓名" value="王小明" id="userName">
+            <div class="goals-container">
+                <div class="goal-box">
+                    <h3><i class="fas fa-sun sun-icon"></i> 学习目标</h3>
+                    <textarea class="goal-text" id="goal-study">1. 完成寒假作业
+2. 阅读3本课外书
+3. 预习下学期数学前三章</textarea>
+                </div>
+                <div class="goal-box">
+                    <h3><i class="fas fa-sun sun-icon"></i> 技能目标</h3>
+                    <textarea class="goal-text" id="goal-skill">1. 学会游泳
+2. 掌握基础编程
+3. 提高英语口语能力</textarea>
+                </div>
+                <div class="goal-box">
+                    <h3><i class="fas fa-sun sun-icon"></i> 健康目标</h3>
+                    <textarea class="goal-text" id="goal-health">1. 每天运动30分钟
+2. 保持规律作息
+3. 多吃蔬菜水果</textarea>
+                </div>
+                <div class="goal-box">
+                    <h3><i class="fas fa-sun sun-icon"></i> 娱乐目标</h3>
+                    <textarea class="goal-text" id="goal-entertainment">1. 看5部经典电影
+2. 学会下中国象棋
+3. 和家人一起旅行一次</textarea>
+                </div>
+            </div>
+        </section>
+        
+        <div class="main-content">
+            <!-- 时间表区域 - 移除滚动条，完全显示 -->
+            <section class="timeline-section">
+                <h2 class="section-title">
+                    <span><i class="far fa-clock"></i> 每日时间安排（半小时间隔）</span>
+                    <span style="font-size: 0.9rem; color: #ff6b8b;">
+                        <i class="fas fa-mouse-pointer"></i> 合并
+                    </span>
+                </h2>
+                
+                <div class="day-navigation" id="dayNavigation">
+                    <div class="day-tab active" data-day="mon">周一</div>
+                    <div class="day-tab" data-day="tue">周二</div>
+                    <div class="day-tab" data-day="wed">周三</div>
+                    <div class="day-tab" data-day="thu">周四</div>
+                    <div class="day-tab" data-day="fri">周五</div>
+                    <div class="day-tab" data-day="sat">周六</div>
+                    <div class="day-tab" data-day="sun">周日</div>
+                </div>
+                
+                <div class="current-day-indicator" id="currentDayIndicator">
+                    <i class="fas fa-calendar-day"></i> <span id="currentDayText">周一计划表</span>
+                </div>
+                
+                <!-- 合并任务控制面板 -->
+                <div class="merge-controls" id="mergeControls" style="display: none;">
+                    <button class="merge-btn" id="mergeTasksBtn">
+                        <i class="fas fa-link"></i> 合并选中时间段
+                    </button>
+                    <button class="merge-btn" id="unmergeTasksBtn">
+                        <i class="fas fa-unlink"></i> 取消合并
+                    </button>
+                    <button class="merge-btn" id="clearSelectionBtn">
+                        <i class="fas fa-times"></i> 清除选择
+                    </button>
+                </div>
+                
+                <div class="merge-info" id="mergeInfo" style="display: none;">
+                    已选择 <span id="selectedCount">0</span> 个时间段，可以合并为一个任务
+                </div>
+                
+                <div class="timeline-scroll">
+                    <!-- 周一计划表 -->
+                    <div class="day-content active" id="day-mon">
+                        <table class="timeline-table">
+                            <!-- 时间表行将通过JavaScript生成 -->
+                        </table>
+                    </div>
+                    
+                    <!-- 其他日期计划表将通过JavaScript生成 -->
+                </div>
+            </section>
+            
+            <!-- 任务区域 - 移除滚动条，完全显示 -->
+            <section class="tasks-section">
+                <div class="tasks-scroll">
+                    <h2 class="section-title"><i class="fas fa-tasks"></i> 重要任务</h2>
+                    <div class="important-tasks" id="importantTasksContainer">
+                        <div class="task-item" id="important-task-1">
+                            <div class="task-icon task-study">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <div class="task-content">
+                                <input type="text" class="task-title-input" value="寒假作业" placeholder="任务标题">
+                                <input type="text" class="task-desc-input" value="每天完成计划部分，避免堆积" placeholder="任务描述">
+                            </div>
+                        </div>
+                        
+                        <div class="task-item" id="important-task-2">
+                            <div class="task-icon task-exercise">
+                                <i class="fas fa-running"></i>
+                            </div>
+                            <div class="task-content">
+                                <input type="text" class="task-title-input" value="每日运动" placeholder="任务标题">
+                                <input type="text" class="task-desc-input" value="保持身体健康，每天至少30分钟" placeholder="任务描述">
+                            </div>
+                        </div>
+                        
+                        <div class="task-item" id="important-task-3">
+                            <div class="task-icon task-study">
+                                <i class="fas fa-palette"></i>
+                            </div>
+                            <div class="task-content">
+                                <input type="text" class="task-title-input" value="兴趣培养" placeholder="任务标题">
+                                <input type="text" class="task-desc-input" value="学习新技能或发展兴趣爱好" placeholder="任务描述">
+                            </div>
+                        </div>
+                        
+                        <div class="task-item" id="important-task-4">
+                            <div class="task-icon task-exercise">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <div class="task-content">
+                                <input type="text" class="task-title-input" value="健康饮食" placeholder="任务标题">
+                                <input type="text" class="task-desc-input" value="保持规律饮食，避免暴饮暴食" placeholder="任务描述">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="add-task-btn" id="addImportantTaskBtn">
+                        <i class="fas fa-plus"></i> 添加重要任务
+                    </button>
+                    
+                    <h2 class="section-title"><i class="fas fa-list-alt"></i> 每日计划检查</h2>
+                    <div class="daily-checklist" id="dailyChecklist">
+                        <div class="checklist-item" id="checklist-item-1">
+                            <input type="checkbox" id="task1" checked>
+                            <input type="text" value="完成今日学习任务" placeholder="检查项内容">
+                        </div>
+                        <div class="checklist-item" id="checklist-item-2">
+                            <input type="checkbox" id="task2">
+                            <input type="text" value="进行体育锻炼" placeholder="检查项内容">
+                        </div>
+                        <div class="checklist-item" id="checklist-item-3">
+                            <input type="checkbox" id="task3">
+                            <input type="text" value="阅读30分钟以上" placeholder="检查项内容">
+                        </div>
+                        <div class="checklist-item" id="checklist-item-4">
+                            <input type="checkbox" id="task4">
+                            <input type="text" value="帮助家务劳动" placeholder="检查项内容">
+                        </div>
+                        <div class="checklist-item" id="checklist-item-5">
+                            <input type="checkbox" id="task5">
+                            <input type="text" value="记录今日收获" placeholder="检查项内容">
+                        </div>
+                    </div>
+                    
+                    <button class="add-task-btn" id="addChecklistItemBtn">
+                        <i class="fas fa-plus"></i> 添加检查项
+                    </button>
+                </div>
+            </section>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="btn btn-save" id="saveBtn">
+                <i class="fas fa-save"></i> 保存计划
+            </button>
+            <button class="btn btn-print" id="printBtn">
+                <i class="fas fa-print"></i> 打印当前日计划
+            </button>
+            <button class="btn btn-export" id="exportBtn">
+                <i class="fas fa-file-export"></i> 导出全部计划
+            </button>
+            <button class="btn btn-clear" id="clearBtn">
+                <i class="fas fa-trash-alt"></i> 清除所有数据
+            </button>
+        </div>
+        
+        <footer>
+            <p>© 2023 寒假计划时间表 | 马卡龙色系可编辑版本 | 半小时间隔 | 点击上方日期切换每日独立计划表</p>
+            <p>提示：每个日期都有独立的时间表，可以分别编辑和保存。按住Ctrl键选择时间段合并。</p>
+            <p>数据会自动保存在您的浏览器本地，下次打开页面时会自动加载。</p>
+        </footer>
+    </div>
+
+    <script>
+        // 定义星期数据
+        const weekDays = {
+            'mon': { name: '周一', fullName: '星期一' },
+            'tue': { name: '周二', fullName: '星期二' },
+            'wed': { name: '周三', fullName: '星期三' },
+            'thu': { name: '周四', fullName: '星期四' },
+            'fri': { name: '周五', fullName: '星期五' },
+            'sat': { name: '周六', fullName: '星期六' },
+            'sun': { name: '周日', fullName: '星期日' }
+        };
+        
+        // 时间表数据（半小时间隔，从8:00到23:00）
+        const generateTimeSlots = () => {
+            const slots = [];
+            for (let hour = 8; hour < 23; hour++) {
+                // 整点
+                slots.push({
+                    time: `${hour.toString().padStart(2, '0')}:00-${hour.toString().padStart(2, '0')}:30`,
+                    hour: hour,
+                    minute: 0
+                });
+                // 半点
+                slots.push({
+                    time: `${hour.toString().padStart(2, '0')}:30-${(hour + 1).toString().padStart(2, '0')}:00`,
+                    hour: hour,
+                    minute: 30
+                });
+            }
+            return slots;
+        };
+        
+        const timeSlots = generateTimeSlots();
+        
+        // 获取不同时间段的活动建议
+        const getActivitySuggestion = (hour, minute, dayType) => {
+            const timeValue = hour + minute / 60;
+            
+            if (dayType === 'weekend') {
+                // 周末安排
+                if (timeValue >= 8 && timeValue < 8.5) return '起床';
+                if (timeValue >= 8.5 && timeValue < 9) return '洗漱';
+                if (timeValue >= 9 && timeValue < 9.5) return '早餐';
+                if (timeValue >= 9.5 && timeValue < 11) return '自由活动';
+                if (timeValue >= 11 && timeValue < 11.5) return '准备午餐';
+                if (timeValue >= 11.5 && timeValue < 12.5) return '午餐时间';
+                if (timeValue >= 12.5 && timeValue < 13.5) return '午休';
+                if (timeValue >= 13.5 && timeValue < 15.5) return '户外活动';
+                if (timeValue >= 15.5 && timeValue < 16.5) return '下午茶点';
+                if (timeValue >= 16.5 && timeValue < 17.5) return '兴趣学习';
+                if (timeValue >= 17.5 && timeValue < 18.5) return '家庭活动';
+                if (timeValue >= 18.5 && timeValue < 19.5) return '晚餐时间';
+                if (timeValue >= 19.5 && timeValue < 21) return '电影/游戏时间';
+                if (timeValue >= 21 && timeValue < 21.5) return '洗漱';
+                if (timeValue >= 21.5 && timeValue < 22.5) return '睡前阅读';
+                if (timeValue >= 22.5) return '睡觉时间';
+            } else {
+                // 工作日安排
+                if (timeValue >= 8 && timeValue < 8.5) return '起床';
+                if (timeValue >= 8.5 && timeValue < 9) return '洗漱';
+                if (timeValue >= 9 && timeValue < 9.5) return '早餐';
+                if (timeValue >= 9.5 && timeValue < 11.5) return '寒假作业/学习';
+                if (timeValue >= 11.5 && timeValue < 12) return '休息放松';
+                if (timeValue >= 12 && timeValue < 12.5) return '准备午餐';
+                if (timeValue >= 12.5 && timeValue < 13.5) return '午餐时间';
+                if (timeValue >= 13.5 && timeValue < 14) return '午休';
+                if (timeValue >= 14 && timeValue < 15) return '户外活动/运动';
+                if (timeValue >= 15 && timeValue < 16.5) return '技能学习/练习';
+                if (timeValue >= 16.5 && timeValue < 17.5) return '娱乐时间';
+                if (timeValue >= 17.5 && timeValue < 18) return '复习/整理';
+                if (timeValue >= 18 && timeValue < 18.5) return '准备晚餐';
+                if (timeValue >= 18.5 && timeValue < 19.5) return '晚餐时间';
+                if (timeValue >= 19.5 && timeValue < 20.5) return '家庭时间/放松';
+                if (timeValue >= 20.5 && timeValue < 21.5) return '阅读/日记';
+                if (timeValue >= 21.5 && timeValue < 22) return '洗漱准备睡觉';
+                if (timeValue >= 22 && timeValue < 22.5) return '睡前准备';
+                if (timeValue >= 22.5) return '睡觉时间';
+            }
+            
+            return '自由安排';
+        };
+        
+        // 重要任务图标数组
+        const taskIcons = [
+            { class: 'task-study', icon: 'fas fa-book' },
+            { class: 'task-exercise', icon: 'fas fa-running' },
+            { class: 'task-study', icon: 'fas fa-palette' },
+            { class: 'task-exercise', icon: 'fas fa-utensils' },
+            { class: 'task-study', icon: 'fas fa-music' },
+            { class: 'task-exercise', icon: 'fas fa-heartbeat' },
+            { class: 'task-study', icon: 'fas fa-language' },
+            { class: 'task-exercise', icon: 'fas fa-hiking' }
+        ];
+        
+        // 全局变量，用于跟踪选中的时间段和合并状态
+        let selectedTimeSlots = [];
+        let mergedGroups = {}; // 存储合并组的信息，key为day，value为合并组数组
+        
+        // 自动保存相关变量
+        let autoSaveTimer = null;
+        let autoSaveDelay = 2000; // 2秒后自动保存
+        
+        // 数据状态提示
+        const dataStatus = document.getElementById('dataStatus');
+        
+        // 显示数据状态提示
+        function showDataStatus(message, type = 'success') {
+            dataStatus.textContent = message;
+            dataStatus.className = 'data-status show';
+            
+            if (type === 'success') {
+                dataStatus.style.backgroundColor = '#f6ffed';
+                dataStatus.style.borderColor = '#b7eb8f';
+            } else if (type === 'error') {
+                dataStatus.style.backgroundColor = '#fff2e8';
+                dataStatus.style.borderColor = '#ffbb96';
+            } else if (type === 'info') {
+                dataStatus.style.backgroundColor = '#e6f7ff';
+                dataStatus.style.borderColor = '#91d5ff';
+            }
+            
+            setTimeout(() => {
+                dataStatus.classList.remove('show');
+            }, 2000);
+        }
+        
+        // 本地存储相关函数
+        const STORAGE_KEY = 'winter_holiday_schedule_v2';
+        
+        // 保存数据到本地存储
+        function saveToLocalStorage() {
+            try {
+                const name = document.getElementById('userName').value;
+                
+                // 收集所有目标数据
+                const goals = {
+                    study: document.getElementById('goal-study').value,
+                    skill: document.getElementById('goal-skill').value,
+                    health: document.getElementById('goal-health').value,
+                    entertainment: document.getElementById('goal-entertainment').value
+                };
+                
+                // 收集所有日期的计划数据
+                const schedule = {};
+                const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+                
+                dayKeys.forEach(dayKey => {
+                    const dayInputs = document.querySelectorAll(`.task-input[data-day="${dayKey}"]`);
+                    schedule[dayKey] = [];
+                    
+                    dayInputs.forEach(input => {
+                        schedule[dayKey].push({
+                            time: input.getAttribute('data-time'),
+                            task: input.value,
+                            isMerged: input.classList.contains('merged'),
+                            mergePosition: input.classList.contains('first') ? 'first' : 
+                                          input.classList.contains('middle') ? 'middle' : 
+                                          input.classList.contains('last') ? 'last' : 'none'
+                        });
+                    });
+                });
+                
+                // 收集重要任务数据
+                const importantTasks = [];
+                const importantTaskItems = document.querySelectorAll('#importantTasksContainer .task-item');
+                importantTaskItems.forEach(task => {
+                    const title = task.querySelector('.task-title-input').value;
+                    const desc = task.querySelector('.task-desc-input').value;
+                    const icon = task.querySelector('.task-icon i').className;
+                    const iconClass = task.querySelector('.task-icon').className.includes('task-study') ? 'task-study' : 'task-exercise';
+                    importantTasks.push({ title, desc, icon, iconClass });
+                });
+                
+                // 收集检查项数据
+                const checklistItems = document.querySelectorAll('#dailyChecklist .checklist-item');
+                const checklist = [];
+                checklistItems.forEach(item => {
+                    const checkbox = item.querySelector('input[type="checkbox"]');
+                    const text = item.querySelector('input[type="text"]').value;
+                    checklist.push({ 
+                        checked: checkbox.checked, 
+                        text: text 
+                    });
+                });
+                
+                // 准备保存的数据对象
+                const saveData = {
+                    name: name,
+                    goals: goals,
+                    schedule: schedule,
+                    importantTasks: importantTasks,
+                    checklist: checklist,
+                    mergedGroups: mergedGroups,
+                    lastSave: new Date().toISOString()
+                };
+                
+                // 保存到本地存储
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
+                console.log('数据已保存到本地存储');
+                
+                return true;
+            } catch (error) {
+                console.error('保存数据失败:', error);
+                showDataStatus('保存数据失败', 'error');
+                return false;
+            }
+        }
+        
+        // 从本地存储加载数据
+        function loadFromLocalStorage() {
+            try {
+                const savedData = localStorage.getItem(STORAGE_KEY);
+                if (!savedData) {
+                    console.log('没有找到保存的数据，使用默认数据');
+                    return false;
+                }
+                
+                const data = JSON.parse(savedData);
+                console.log('从本地存储加载数据:', data);
+                
+                // 加载姓名
+                if (data.name) {
+                    document.getElementById('userName').value = data.name;
+                }
+                
+                // 加载目标数据
+                if (data.goals) {
+                    if (data.goals.study) document.getElementById('goal-study').value = data.goals.study;
+                    if (data.goals.skill) document.getElementById('goal-skill').value = data.goals.skill;
+                    if (data.goals.health) document.getElementById('goal-health').value = data.goals.health;
+                    if (data.goals.entertainment) document.getElementById('goal-entertainment').value = data.goals.entertainment;
+                }
+                
+                // 加载合并组数据
+                if (data.mergedGroups) {
+                    mergedGroups = data.mergedGroups;
+                }
+                
+                // 重要任务会在生成后通过applySavedData函数加载
+                // 检查项数据也会在生成后加载
+                
+                // 返回数据以便后续应用
+                return data;
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                return false;
+            }
+        }
+        
+        // 应用已保存的数据到页面
+        function applySavedData(savedData) {
+            if (!savedData) return;
+            
+            // 应用时间表数据
+            if (savedData.schedule) {
+                Object.keys(savedData.schedule).forEach(dayKey => {
+                    const daySchedule = savedData.schedule[dayKey];
+                    const dayInputs = document.querySelectorAll(`.task-input[data-day="${dayKey}"]`);
+                    
+                    dayInputs.forEach((input, index) => {
+                        if (daySchedule[index]) {
+                            input.value = daySchedule[index].task || '';
+                            
+                            // 应用合并样式
+                            if (daySchedule[index].isMerged) {
+                                input.classList.add('merged');
+                                if (daySchedule[index].mergePosition === 'first') {
+                                    input.classList.add('first');
+                                } else if (daySchedule[index].mergePosition === 'middle') {
+                                    input.classList.add('middle');
+                                } else if (daySchedule[index].mergePosition === 'last') {
+                                    input.classList.add('last');
+                                }
+                            }
+                        }
+                    });
+                });
+            }
+            
+            // 应用重要任务数据
+            if (savedData.importantTasks && savedData.importantTasks.length > 0) {
+                const importantTasksContainer = document.getElementById('importantTasksContainer');
+                
+                // 清空默认的重要任务
+                importantTasksContainer.innerHTML = '';
+                
+                // 添加保存的重要任务
+                savedData.importantTasks.forEach((task, index) => {
+                    const newTask = document.createElement('div');
+                    newTask.className = 'task-item';
+                    newTask.id = `important-task-${index + 1}`;
+                    newTask.innerHTML = `
+                        <div class="task-icon ${task.iconClass || 'task-study'}">
+                            <i class="${task.icon || 'fas fa-book'}"></i>
+                        </div>
+                        <div class="task-content">
+                            <input type="text" class="task-title-input" value="${task.title || '新任务'}" placeholder="任务标题">
+                            <input type="text" class="task-desc-input" value="${task.desc || '任务描述'}" placeholder="任务描述">
+                        </div>
+                        <button class="delete-task-btn" style="background: none; border: none; color: #ff6b6b; cursor: pointer; margin-left: 10px; font-size: 1.2rem;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    
+                    importantTasksContainer.appendChild(newTask);
+                    
+                    // 添加删除功能
+                    const deleteBtn = newTask.querySelector('.delete-task-btn');
+                    deleteBtn.addEventListener('click', function() {
+                        if (confirm('确定要删除这个重要任务吗？')) {
+                            newTask.remove();
+                            // 保存更改
+                            scheduleAutoSave();
+                        }
+                    });
+                });
+            }
+            
+            // 应用检查项数据
+            if (savedData.checklist && savedData.checklist.length > 0) {
+                const checklistContainer = document.getElementById('dailyChecklist');
+                
+                // 清空默认的检查项
+                checklistContainer.innerHTML = '';
+                
+                // 添加保存的检查项
+                savedData.checklist.forEach((item, index) => {
+                    const newItem = document.createElement('div');
+                    newItem.className = 'checklist-item';
+                    newItem.id = `checklist-item-${index + 1}`;
+                    newItem.innerHTML = `
+                        <input type="checkbox" id="task${index + 1}" ${item.checked ? 'checked' : ''}>
+                        <input type="text" value="${item.text || '新检查项'}" placeholder="检查项内容">
+                        <button class="delete-checklist-btn" style="background: none; border: none; color: #ff6b6b; cursor: pointer; margin-left: 10px; font-size: 1.2rem;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    
+                    checklistContainer.appendChild(newItem);
+                    
+                    // 设置复选框交互
+                    const checkbox = newItem.querySelector('input[type="checkbox"]');
+                    const textInput = newItem.querySelector('input[type="text"]');
+                    
+                    checkbox.addEventListener('change', function() {
+                        if (this.checked) {
+                            textInput.style.textDecoration = 'line-through';
+                            textInput.style.color = '#aaa';
+                        } else {
+                            textInput.style.textDecoration = 'none';
+                            textInput.style.color = '#444';
+                        }
+                        // 保存更改
+                        scheduleAutoSave();
+                    });
+                    
+                    // 初始化复选框状态
+                    if (item.checked) {
+                        textInput.style.textDecoration = 'line-through';
+                        textInput.style.color = '#aaa';
+                    }
+                    
+                    // 添加删除功能
+                    const deleteBtn = newItem.querySelector('.delete-checklist-btn');
+                    deleteBtn.addEventListener('click', function() {
+                        if (confirm('确定要删除这个检查项吗？')) {
+                            newItem.remove();
+                            // 保存更改
+                            scheduleAutoSave();
+                        }
+                    });
+                });
+            }
+            
+            // 调整任务区域高度
+            adjustTasksHeight();
+            
+            // 显示加载成功提示
+            const saveDate = savedData.lastSave ? new Date(savedData.lastSave).toLocaleString() : '未知时间';
+            showDataStatus(`已加载上次保存的数据 (${saveDate})`, 'info');
+        }
+        
+        // 清除所有本地数据
+        function clearLocalStorage() {
+            if (confirm('确定要清除所有保存的数据吗？这将恢复为默认设置。')) {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload(); // 重新加载页面以恢复默认数据
+            }
+        }
+        
+        // 计划自动保存（防抖函数）
+        function scheduleAutoSave() {
+            // 清除之前的定时器
+            if (autoSaveTimer) {
+                clearTimeout(autoSaveTimer);
+            }
+            
+            // 设置新的定时器
+            autoSaveTimer = setTimeout(() => {
+                if (saveToLocalStorage()) {
+                    showDataStatus('数据已自动保存');
+                }
+            }, autoSaveDelay);
+        }
+        
+        // 初始化函数
+        function init() {
+            // 初始化合并组存储
+            mergedGroups = {};
+            
+            // 生成所有日期的计划表
+            generateAllDayContents();
+            
+            // 从本地存储加载数据
+            const savedData = loadFromLocalStorage();
+            
+            // 设置日期切换事件
+            setupDayNavigation();
+            
+            // 设置当前日期指示器
+            updateCurrentDayIndicator('mon');
+            
+            // 设置保存、打印和导出功能
+            setupActionButtons();
+            
+            // 设置复选框交互
+            setupCheckboxes();
+            
+            // 设置输入框交互（包括自动保存）
+            setupInputs();
+            
+            // 设置重要任务和检查项的添加功能
+            setupTaskAddButtons();
+            
+            // 设置重要任务的删除功能
+            setupTaskDelete();
+            
+            // 设置任务合并功能
+            setupTaskMerging();
+            
+            // 调整时间表区域高度，确保所有内容完全显示
+            adjustTimelineHeight();
+            
+            // 调整任务区域高度，确保所有内容完全显示
+            adjustTasksHeight();
+            
+            // 应用已保存的数据（在页面完全生成后）
+            setTimeout(() => {
+                applySavedData(savedData);
+            }, 100);
+        }
+        
+        // 生成所有日期的计划表
+        function generateAllDayContents() {
+            const timelineScroll = document.querySelector('.timeline-scroll');
+            
+            // 清空现有内容（除了周一）
+            const existingDays = document.querySelectorAll('.day-content');
+            existingDays.forEach(day => {
+                if (day.id !== 'day-mon') {
+                    day.remove();
+                }
+            });
+            
+            // 生成周一的时间表
+            generateDayContent('mon', 'weekday');
+            
+            // 生成周二到周五的时间表
+            ['tue', 'wed', 'thu', 'fri'].forEach(dayKey => {
+                generateDayContent(dayKey, 'weekday');
+            });
+            
+            // 生成周末的时间表
+            ['sat', 'sun'].forEach(dayKey => {
+                generateDayContent(dayKey, 'weekend');
+            });
+        }
+        
+        // 生成单个日期的计划表
+        function generateDayContent(dayKey, dayType) {
+            // 如果已经存在，先移除
+            const existingDay = document.getElementById(`day-${dayKey}`);
+            if (existingDay) {
+                existingDay.remove();
+            }
+            
+            const dayContent = document.createElement('div');
+            dayContent.className = 'day-content';
+            dayContent.id = `day-${dayKey}`;
+            
+            let tableHTML = '<table class="timeline-table">';
+            
+            timeSlots.forEach((slot, index) => {
+                const activity = getActivitySuggestion(slot.hour, slot.minute, dayType);
+                
+                tableHTML += `
+                    <tr>
+                        <td class="time-cell">${slot.time}</td>
+                        <td class="task-cell">
+                            <input type="text" class="task-input" data-day="${dayKey}" data-time="${slot.hour}:${slot.minute === 0 ? '00' : '30'}" data-index="${index}" placeholder="输入计划内容" value="${activity}">
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += '</table>';
+            dayContent.innerHTML = tableHTML;
+            document.querySelector('.timeline-scroll').appendChild(dayContent);
+            
+            // 为这个日期的所有输入框添加点击事件
+            setupDayInputSelection(dayKey);
+        }
+        
+        // 为日期输入框设置选择功能
+        function setupDayInputSelection(dayKey) {
+            const inputs = document.querySelectorAll(`.task-input[data-day="${dayKey}"]`);
+            
+            inputs.forEach(input => {
+                // 移除之前的点击事件监听器，避免重复添加
+                const newInput = input.cloneNode(true);
+                input.parentNode.replaceChild(newInput, input);
+                
+                // 添加新的点击事件监听器
+                newInput.addEventListener('click', function(e) {
+                    // 如果按住了Ctrl键，则进行多选
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        toggleTimeSlotSelection(this);
+                    }
+                });
+                
+                // 添加双击事件用于直接编辑
+                newInput.addEventListener('dblclick', function() {
+                    this.focus();
+                });
+                
+                // 添加焦点事件，移除选择状态（当用户开始编辑时）
+                newInput.addEventListener('focus', function() {
+                    if (this.classList.contains('selected')) {
+                        this.classList.remove('selected');
+                        updateSelectedTimeSlots();
+                    }
+                });
+                
+                // 添加输入事件，触发自动保存
+                newInput.addEventListener('input', function() {
+                    scheduleAutoSave();
+                });
+            });
+        }
+        
+        // 切换时间段选择状态
+        function toggleTimeSlotSelection(input) {
+            const day = input.getAttribute('data-day');
+            const time = input.getAttribute('data-time');
+            const index = parseInt(input.getAttribute('data-index'));
+            
+            // 检查是否已经被合并
+            if (input.classList.contains('merged')) {
+                alert('该时间段已经是合并任务的一部分，请先取消合并。');
+                return;
+            }
+            
+            // 切换选择状态
+            if (input.classList.contains('selected')) {
+                input.classList.remove('selected');
+                // 从选中列表中移除
+                selectedTimeSlots = selectedTimeSlots.filter(slot => 
+                    !(slot.day === day && slot.time === time)
+                );
+            } else {
+                input.classList.add('selected');
+                // 添加到选中列表
+                selectedTimeSlots.push({ day, time, index, input });
+            }
+            
+            // 更新合并控制面板
+            updateMergeControls();
+        }
+        
+        // 更新合并控制面板
+        function updateMergeControls() {
+            const mergeControls = document.getElementById('mergeControls');
+            const mergeInfo = document.getElementById('mergeInfo');
+            const selectedCount = document.getElementById('selectedCount');
+            const mergeTasksBtn = document.getElementById('mergeTasksBtn');
+            const unmergeTasksBtn = document.getElementById('unmergeTasksBtn');
+            
+            selectedCount.textContent = selectedTimeSlots.length;
+            
+            if (selectedTimeSlots.length > 0) {
+                mergeControls.style.display = 'flex';
+                mergeInfo.style.display = 'block';
+                
+                // 至少需要选择2个时间段才能合并
+                mergeTasksBtn.disabled = selectedTimeSlots.length < 2;
+                
+                // 检查当前选中的时间段是否在同一个日期且连续
+                const sameDay = selectedTimeSlots.every(slot => slot.day === selectedTimeSlots[0].day);
+                const sortedSlots = [...selectedTimeSlots].sort((a, b) => a.index - b.index);
+                let consecutive = true;
+                
+                for (let i = 1; i < sortedSlots.length; i++) {
+                    if (sortedSlots[i].index !== sortedSlots[i-1].index + 1) {
+                        consecutive = false;
+                        break;
+                    }
+                }
+                
+                if (!sameDay || !consecutive) {
+                    mergeTasksBtn.disabled = true;
+                    mergeInfo.innerHTML = `已选择 <span id="selectedCount">${selectedTimeSlots.length}</span> 个时间段，必须选择同一天且连续的时间段才能合并`;
+                    mergeInfo.style.backgroundColor = '#fff2e8';
+                    mergeInfo.style.borderColor = '#ffbb96';
+                } else {
+                    mergeInfo.innerHTML = `已选择 <span id="selectedCount">${selectedTimeSlots.length}</span> 个时间段，可以合并为一个任务`;
+                    mergeInfo.style.backgroundColor = '#f6ffed';
+                    mergeInfo.style.borderColor = '#b7eb8f';
+                }
+            } else {
+                mergeControls.style.display = 'none';
+                mergeInfo.style.display = 'none';
+            }
+            
+            // 检查当前激活的日期是否有合并的任务
+            const activeDay = document.querySelector('.day-tab.active').getAttribute('data-day');
+            const hasMergedTasks = checkDayHasMergedTasks(activeDay);
+            unmergeTasksBtn.disabled = !hasMergedTasks;
+        }
+        
+        // 检查指定日期是否有合并的任务
+        function checkDayHasMergedTasks(dayKey) {
+            const inputs = document.querySelectorAll(`.task-input[data-day="${dayKey}"]`);
+            let hasMerged = false;
+            
+            inputs.forEach(input => {
+                if (input.classList.contains('merged')) {
+                    hasMerged = true;
+                }
+            });
+            
+            return hasMerged;
+        }
+        
+        // 合并选中的时间段
+        function mergeSelectedTimeSlots() {
+            if (selectedTimeSlots.length < 2) {
+                alert('请至少选择2个时间段进行合并。');
+                return;
+            }
+            
+            // 按索引排序
+            const sortedSlots = [...selectedTimeSlots].sort((a, b) => a.index - b.index);
+            
+            // 检查是否在同一个日期
+            const day = sortedSlots[0].day;
+            const sameDay = sortedSlots.every(slot => slot.day === day);
+            
+            if (!sameDay) {
+                alert('不能合并不同日期的时间段。');
+                return;
+            }
+            
+            // 检查是否连续
+            let consecutive = true;
+            for (let i = 1; i < sortedSlots.length; i++) {
+                if (sortedSlots[i].index !== sortedSlots[i-1].index + 1) {
+                    consecutive = false;
+                    break;
+                }
+            }
+            
+            if (!consecutive) {
+                alert('只能合并连续的时间段。');
+                return;
+            }
+            
+            // 获取合并的任务内容（使用第一个时间段的内容）
+            const firstInput = sortedSlots[0].input;
+            const mergedTask = firstInput.value || '合并任务';
+            
+            // 为合并的组生成一个唯一的ID
+            const mergeId = `merge-${day}-${Date.now()}`;
+            
+            // 初始化该日期的合并组数组
+            if (!mergedGroups[day]) {
+                mergedGroups[day] = [];
+            }
+            
+            // 创建合并组信息
+            const mergeGroup = {
+                id: mergeId,
+                startIndex: sortedSlots[0].index,
+                endIndex: sortedSlots[sortedSlots.length - 1].index,
+                task: mergedTask,
+                timeSlots: sortedSlots.map(slot => ({
+                    time: slot.time,
+                    index: slot.index
+                }))
+            };
+            
+            // 保存合并组
+            mergedGroups[day].push(mergeGroup);
+            
+            // 应用合并样式
+            sortedSlots.forEach((slot, i) => {
+                const input = slot.input;
+                input.value = mergedTask;
+                input.classList.add('merged');
+                
+                // 设置合并样式
+                if (sortedSlots.length === 1) {
+                    // 单个时间段不合并
+                    input.classList.remove('merged');
+                } else if (i === 0) {
+                    // 第一个
+                    input.classList.add('first');
+                } else if (i === sortedSlots.length - 1) {
+                    // 最后一个
+                    input.classList.add('last');
+                } else {
+                    // 中间
+                    input.classList.add('middle');
+                }
+                
+                // 移除选择状态
+                input.classList.remove('selected');
+            });
+            
+            // 清除选择
+            clearSelection();
+            
+            // 更新合并控制面板
+            updateMergeControls();
+            
+            // 保存更改
+            scheduleAutoSave();
+            
+            // 显示成功消息
+            const startTime = sortedSlots[0].time.split('-')[0];
+            const endTime = sortedSlots[sortedSlots.length - 1].time.split('-')[1];
+            alert(`已成功合并 ${startTime} 到 ${endTime} 的时间段为: "${mergedTask}"`);
+        }
+        
+        // 取消当前日期的所有合并
+        function unmergeAllTasks() {
+            const activeDay = document.querySelector('.day-tab.active').getAttribute('data-day');
+            
+            if (!mergedGroups[activeDay] || mergedGroups[activeDay].length === 0) {
+                alert('当前日期没有合并的任务。');
+                return;
+            }
+            
+            if (confirm(`确定要取消 ${weekDays[activeDay].fullName} 的所有任务合并吗？`)) {
+                // 清除该日期的所有合并样式
+                const inputs = document.querySelectorAll(`.task-input[data-day="${activeDay}"]`);
+                inputs.forEach(input => {
+                    input.classList.remove('merged', 'first', 'middle', 'last');
+                });
+                
+                // 清除该日期的合并组
+                mergedGroups[activeDay] = [];
+                
+                // 更新合并控制面板
+                updateMergeControls();
+                
+                // 保存更改
+                scheduleAutoSave();
+                
+                alert(`已取消 ${weekDays[activeDay].fullName} 的所有任务合并。`);
+            }
+        }
+        
+        // 清除所有选择
+        function clearSelection() {
+            selectedTimeSlots.forEach(slot => {
+                if (slot.input) {
+                    slot.input.classList.remove('selected');
+                }
+            });
+            
+            selectedTimeSlots = [];
+            updateMergeControls();
+        }
+        
+        // 设置任务合并功能
+        function setupTaskMerging() {
+            // 合并按钮
+            document.getElementById('mergeTasksBtn').addEventListener('click', mergeSelectedTimeSlots);
+            
+            // 取消合并按钮
+            document.getElementById('unmergeTasksBtn').addEventListener('click', unmergeAllTasks);
+            
+            // 清除选择按钮
+            document.getElementById('clearSelectionBtn').addEventListener('click', clearSelection);
+            
+            // 为整个文档添加键盘事件监听
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+M 合并
+                if ((e.ctrlKey || e.metaKey) && e.key === 'm') {
+                    e.preventDefault();
+                    if (!document.getElementById('mergeTasksBtn').disabled) {
+                        mergeSelectedTimeSlots();
+                    }
+                }
+                
+                // Ctrl+Shift+M 取消合并
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'M') {
+                    e.preventDefault();
+                    if (!document.getElementById('unmergeTasksBtn').disabled) {
+                        unmergeAllTasks();
+                    }
+                }
+                
+                // Escape 清除选择
+                if (e.key === 'Escape') {
+                    clearSelection();
+                }
+            });
+            
+            // 添加提示信息
+            document.querySelector('.timeline-section .section-title').insertAdjacentHTML('beforeend', 
+                '<div style="font-size: 0.8rem; color: #666; margin-top: 5px;">提示：Ctrl点击时间段合并</div>'
+            );
+        }
+        
+        // 调整时间表区域高度，确保所有内容完全显示
+        function adjustTimelineHeight() {
+            const timelineScroll = document.querySelector('.timeline-scroll');
+            const activeDayContent = document.querySelector('.day-content.active');
+            
+            if (activeDayContent) {
+                // 获取时间表的总高度
+                const tableHeight = activeDayContent.querySelector('.timeline-table').offsetHeight;
+                // 设置时间表区域的最小高度，确保所有行都能显示
+                timelineScroll.style.minHeight = tableHeight + 50 + 'px';
+            }
+        }
+        
+        // 调整任务区域高度，确保所有内容完全显示
+        function adjustTasksHeight() {
+            const tasksScroll = document.querySelector('.tasks-scroll');
+            const importantTasks = document.querySelector('.important-tasks');
+            const dailyChecklist = document.getElementById('dailyChecklist');
+            
+            if (importantTasks && dailyChecklist) {
+                // 计算重要任务区域的高度
+                const importantTasksHeight = importantTasks.offsetHeight;
+                
+                // 计算每日检查区域的高度
+                const checklistHeight = dailyChecklist.offsetHeight;
+                
+                // 计算按钮的高度
+                const buttonsHeight = document.getElementById('addImportantTaskBtn').offsetHeight + 
+                                     document.getElementById('addChecklistItemBtn').offsetHeight + 30;
+                
+                // 计算标题的高度
+                const titlesHeight = 100;
+                
+                // 设置任务区域的最小高度
+                const totalHeight = importantTasksHeight + checklistHeight + buttonsHeight + titlesHeight;
+                tasksScroll.style.minHeight = totalHeight + 'px';
+            }
+        }
+        
+        // 设置日期导航功能
+        function setupDayNavigation() {
+            const dayTabs = document.querySelectorAll('.day-tab');
+            const dayContents = document.querySelectorAll('.day-content');
+            
+            dayTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const dayKey = this.getAttribute('data-day');
+                    
+                    // 更新激活的标签
+                    dayTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 显示对应的内容
+                    dayContents.forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(`day-${dayKey}`).classList.add('active');
+                    
+                    // 更新当前日期指示器
+                    updateCurrentDayIndicator(dayKey);
+                    
+                    // 清除选择
+                    clearSelection();
+                    
+                    // 调整时间表区域高度
+                    adjustTimelineHeight();
+                    
+                    // 更新合并控制面板
+                    updateMergeControls();
+                });
+            });
+        }
+        
+        // 更新当前日期指示器
+        function updateCurrentDayIndicator(dayKey) {
+            const dayInfo = weekDays[dayKey];
+            document.getElementById('currentDayText').textContent = `${dayInfo.fullName}计划表`;
+        }
+        
+        // 设置保存、打印和导出功能
+        function setupActionButtons() {
+            // 保存计划功能
+            document.getElementById('saveBtn').addEventListener('click', function() {
+                if (saveToLocalStorage()) {
+                    showDataStatus('计划已保存');
+                    
+                    // 标记已保存（视觉反馈）
+                    this.innerHTML = '<i class="fas fa-check"></i> 已保存';
+                    this.style.background = 'linear-gradient(to right, #a1c4fd, #c2e9fb)';
+                    
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-save"></i> 保存计划';
+                        this.style.background = 'linear-gradient(to right, #ff9a9e, #fad0c4)';
+                    }, 2000);
+                }
+            });
+            
+            // 打印当前日计划功能
+            document.getElementById('printBtn').addEventListener('click', function() {
+                const activeDay = document.querySelector('.day-tab.active').getAttribute('data-day');
+                const dayInfo = weekDays[activeDay];
+                
+                // 创建一个打印友好的版本
+                const printWindow = window.open('', '_blank');
+                const printContent = `
+                    <html>
+                    <head>
+                        <title>${dayInfo.fullName}计划表</title>
+                        <style>
+                            body { font-family: 'Microsoft YaHei', sans-serif; padding: 20px; }
+                            h1 { color: #ff9a9e; text-align: center; }
+                            .print-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                            .print-table th, .print-table td { border: 1px solid #ddd; padding: 10px; }
+                            .print-table th { background-color: #f9f9f9; }
+                            .time-col { width: 120px; font-weight: bold; color: #ff6b8b; }
+                            .merged-row { background-color: #f6ffed !important; }
+                            @media print {
+                                body { font-size: 12pt; }
+                                .print-table { font-size: 11pt; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>${dayInfo.fullName}计划表</h1>
+                        <p><strong>姓名：</strong>${document.getElementById('userName').value}</p>
+                        <p><strong>日期：</strong>${new Date().toLocaleDateString()}</p>
+                        <table class="print-table">
+                            <tr>
+                                <th>时间</th>
+                                <th>计划内容</th>
+                            </tr>
+                `;
+                
+                // 添加时间表内容
+                const dayInputs = document.querySelectorAll(`.task-input[data-day="${activeDay}"]`);
+                let prevTask = '';
+                let isMerged = false;
+                
+                dayInputs.forEach(input => {
+                    const time = input.getAttribute('data-time');
+                    const task = input.value;
+                    const isMergedRow = input.classList.contains('merged');
+                    
+                    // 如果是合并任务的一部分，只显示一次
+                    if (isMergedRow && input.classList.contains('first')) {
+                        // 计算合并的时间范围
+                        const startTime = time.split('-')[0];
+                        let endTime = time.split('-')[1];
+                        
+                        // 找到合并的结束时间
+                        let currentInput = input;
+                        while (currentInput && !currentInput.classList.contains('last')) {
+                            const nextRow = currentInput.closest('tr').nextElementSibling;
+                            if (nextRow) {
+                                currentInput = nextRow.querySelector('.task-input');
+                                if (currentInput && currentInput.classList.contains('merged')) {
+                                    endTime = currentInput.getAttribute('data-time').split('-')[1];
+                                }
+                            } else {
+                                break;
+                            }
+                        }
+                        
+                        printContent += `
+                            <tr class="merged-row">
+                                <td class="time-col">${startTime}-${endTime}</td>
+                                <td>${task} (合并任务)</td>
+                            </tr>
+                        `;
+                        prevTask = task;
+                        isMerged = true;
+                    } else if (isMergedRow && (input.classList.contains('middle') || input.classList.contains('last'))) {
+                        // 跳过中间和最后的合并行
+                        return;
+                    } else {
+                        // 普通行
+                        const rowClass = isMerged ? 'merged-row' : '';
+                        printContent += `
+                            <tr${rowClass ? ` class="${rowClass}"` : ''}>
+                                <td class="time-col">${time}</td>
+                                <td>${task}</td>
+                            </tr>
+                        `;
+                        prevTask = task;
+                        isMerged = false;
+                    }
+                });
+                
+                printContent += `
+                        </table>
+                        <script>
+                            window.onload = function() {
+                                window.print();
+                                setTimeout(function() {
+                                    window.close();
+                                }, 500);
+                            }
+                        <\/script>
+                    </body>
+                    </html>
+                `;
+                
+                printWindow.document.write(printContent);
+                printWindow.document.close();
+            });
+            
+            // 导出全部计划功能
+            document.getElementById('exportBtn').addEventListener('click', function() {
+                const name = document.getElementById('userName').value;
+                let allData = {
+                    name: name,
+                    exportDate: new Date().toISOString(),
+                    goals: {},
+                    schedule: {},
+                    importantTasks: [],
+                    dailyChecklist: [],
+                    mergedTasks: mergedGroups // 包含合并任务信息
+                };
+                
+                // 收集所有目标数据
+                allData.goals = {
+                    study: document.getElementById('goal-study').value,
+                    skill: document.getElementById('goal-skill').value,
+                    health: document.getElementById('goal-health').value,
+                    entertainment: document.getElementById('goal-entertainment').value
+                };
+                
+                // 收集所有日期的计划数据
+                const dayTabs = document.querySelectorAll('.day-tab');
+                dayTabs.forEach(tab => {
+                    const dayKey = tab.getAttribute('data-day');
+                    const dayInputs = document.querySelectorAll(`.task-input[data-day="${dayKey}"]`);
+                    
+                    allData.schedule[dayKey] = {
+                        dayName: weekDays[dayKey].fullName,
+                        tasks: []
+                    };
+                    
+                    dayInputs.forEach(input => {
+                        allData.schedule[dayKey].tasks.push({
+                            time: input.getAttribute('data-time'),
+                            task: input.value,
+                            isMerged: input.classList.contains('merged'),
+                            mergePosition: input.classList.contains('first') ? 'first' : 
+                                          input.classList.contains('middle') ? 'middle' : 
+                                          input.classList.contains('last') ? 'last' : 'none'
+                        });
+                    });
+                });
+                
+                // 收集重要任务数据
+                const importantTasks = document.querySelectorAll('#importantTasksContainer .task-item');
+                importantTasks.forEach(task => {
+                    const title = task.querySelector('.task-title-input').value;
+                    const desc = task.querySelector('.task-desc-input').value;
+                    const icon = task.querySelector('.task-icon i').className;
+                    const iconClass = task.querySelector('.task-icon').className.includes('task-study') ? 'task-study' : 'task-exercise';
+                    allData.importantTasks.push({ title, desc, icon, iconClass });
+                });
+                
+                // 收集检查项数据
+                const checklistItems = document.querySelectorAll('#dailyChecklist .checklist-item');
+                checklistItems.forEach(item => {
+                    const checkbox = item.querySelector('input[type="checkbox"]');
+                    const text = item.querySelector('input[type="text"]').value;
+                    allData.dailyChecklist.push({ 
+                        checked: checkbox.checked, 
+                        text: text 
+                    });
+                });
+                
+                // 将数据导出为JSON文件
+                const dataStr = JSON.stringify(allData, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                
+                const exportFileDefaultName = `寒假计划表_${name}_${new Date().toISOString().split('T')[0]}.json`;
+                
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+                
+                // 标记已导出（视觉反馈）
+                this.innerHTML = '<i class="fas fa-check"></i> 已导出';
+                this.style.background = 'linear-gradient(to right, #ff9a9e, #fad0c4)';
+                
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-file-export"></i> 导出全部计划';
+                    this.style.background = 'linear-gradient(to right, #84fab0, #8fd3f4)';
+                }, 2000);
+            });
+            
+            // 清除所有数据功能
+            document.getElementById('clearBtn').addEventListener('click', clearLocalStorage);
+        }
+        
+        // 设置复选框交互
+        function setupCheckboxes() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const textInput = this.parentElement.querySelector('input[type="text"]');
+                    if (this.checked) {
+                        textInput.style.textDecoration = 'line-through';
+                        textInput.style.color = '#aaa';
+                    } else {
+                        textInput.style.textDecoration = 'none';
+                        textInput.style.color = '#444';
+                    }
+                    
+                    // 保存更改
+                    scheduleAutoSave();
+                });
+                
+                // 初始化已勾选的复选框状态
+                if (checkbox.checked) {
+                    const textInput = checkbox.parentElement.querySelector('input[type="text"]');
+                    textInput.style.textDecoration = 'line-through';
+                    textInput.style.color = '#aaa';
+                }
+            });
+        }
+        
+        // 设置输入框交互
+        function setupInputs() {
+            // 为所有可编辑的输入框添加自动保存功能
+            const editableInputs = document.querySelectorAll(
+                'input[type="text"], textarea, .task-title-input, .task-desc-input'
+            );
+            
+            editableInputs.forEach(input => {
+                // 添加输入事件，触发自动保存
+                input.addEventListener('input', scheduleAutoSave);
+                
+                // 添加焦点和失焦效果
+                input.addEventListener('focus', function() {
+                    if (this.parentElement && this.parentElement.style) {
+                        this.parentElement.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+                    }
+                });
+                
+                input.addEventListener('blur', function() {
+                    if (this.parentElement && this.parentElement.style) {
+                        this.parentElement.style.backgroundColor = '';
+                    }
+                });
+            });
+            
+            // 特别为姓名输入框添加自动保存
+            document.getElementById('userName').addEventListener('input', scheduleAutoSave);
+            
+            // 为目标文本框添加自动保存
+            document.querySelectorAll('.goal-text').forEach(textarea => {
+                textarea.addEventListener('input', scheduleAutoSave);
+            });
+        }
+        
+        // 设置任务添加功能
+        function setupTaskAddButtons() {
+            // 添加重要任务
+            document.getElementById('addImportantTaskBtn').addEventListener('click', function() {
+                const importantTasksContainer = document.getElementById('importantTasksContainer');
+                const taskCount = importantTasksContainer.children.length + 1;
+                
+                // 随机选择图标
+                const iconIndex = Math.floor(Math.random() * taskIcons.length);
+                const icon = taskIcons[iconIndex];
+                
+                const newTask = document.createElement('div');
+                newTask.className = 'task-item';
+                newTask.id = `important-task-${taskCount}`;
+                newTask.innerHTML = `
+                    <div class="task-icon ${icon.class}">
+                        <i class="${icon.icon}"></i>
+                    </div>
+                    <div class="task-content">
+                        <input type="text" class="task-title-input" value="新任务" placeholder="任务标题">
+                        <input type="text" class="task-desc-input" value="任务描述" placeholder="任务描述">
+                    </div>
+                    <button class="delete-task-btn" style="background: none; border: none; color: #ff6b6b; cursor: pointer; margin-left: 10px; font-size: 1.2rem;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                importantTasksContainer.appendChild(newTask);
+                
+                // 添加删除功能
+                const deleteBtn = newTask.querySelector('.delete-task-btn');
+                deleteBtn.addEventListener('click', function() {
+                    if (confirm('确定要删除这个重要任务吗？')) {
+                        newTask.remove();
+                        // 保存更改
+                        scheduleAutoSave();
+                    }
+                });
+                
+                // 添加输入框交互和自动保存
+                const inputs = newTask.querySelectorAll('input');
+                inputs.forEach(input => {
+                    input.addEventListener('input', scheduleAutoSave);
+                    
+                    input.addEventListener('focus', function() {
+                        this.parentElement.parentElement.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+                    });
+                    
+                    input.addEventListener('blur', function() {
+                        this.parentElement.parentElement.style.backgroundColor = '';
+                    });
+                });
+                
+                // 调整任务区域高度
+                adjustTasksHeight();
+                
+                // 保存更改
+                scheduleAutoSave();
+            });
+            
+            // 添加检查项
+            document.getElementById('addChecklistItemBtn').addEventListener('click', function() {
+                const checklistContainer = document.getElementById('dailyChecklist');
+                const itemCount = checklistContainer.children.length + 1;
+                
+                const newItem = document.createElement('div');
+                newItem.className = 'checklist-item';
+                newItem.id = `checklist-item-${itemCount}`;
+                newItem.innerHTML = `
+                    <input type="checkbox" id="task${itemCount}">
+                    <input type="text" value="新检查项" placeholder="检查项内容">
+                    <button class="delete-checklist-btn" style="background: none; border: none; color: #ff6b6b; cursor: pointer; margin-left: 10px; font-size: 1.2rem;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                checklistContainer.appendChild(newItem);
+                
+                // 设置复选框交互
+                const checkbox = newItem.querySelector('input[type="checkbox"]');
+                const textInput = newItem.querySelector('input[type="text"]');
+                
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        textInput.style.textDecoration = 'line-through';
+                        textInput.style.color = '#aaa';
+                    } else {
+                        textInput.style.textDecoration = 'none';
+                        textInput.style.color = '#444';
+                    }
+                    // 保存更改
+                    scheduleAutoSave();
+                });
+                
+                // 添加输入事件，触发自动保存
+                textInput.addEventListener('input', scheduleAutoSave);
+                
+                // 添加删除功能
+                const deleteBtn = newItem.querySelector('.delete-checklist-btn');
+                deleteBtn.addEventListener('click', function() {
+                    if (confirm('确定要删除这个检查项吗？')) {
+                        newItem.remove();
+                        // 保存更改
+                        scheduleAutoSave();
+                    }
+                });
+                
+                // 调整任务区域高度
+                adjustTasksHeight();
+                
+                // 保存更改
+                scheduleAutoSave();
+            });
+        }
+        
+        // 设置任务删除功能（为初始任务添加）
+        function setupTaskDelete() {
+            // 为初始重要任务添加删除按钮
+            const importantTasks = document.querySelectorAll('#importantTasksContainer .task-item');
+            importantTasks.forEach(task => {
+                // 检查是否已有删除按钮
+                if (!task.querySelector('.delete-task-btn')) {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-task-btn';
+                    deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+                    deleteBtn.style.cssText = 'background: none; border: none; color: #ff6b6b; cursor: pointer; margin-left: 10px; font-size: 1.2rem;';
+                    
+                    deleteBtn.addEventListener('click', function() {
+                        if (confirm('确定要删除这个重要任务吗？')) {
+                            task.remove();
+                            // 调整任务区域高度
+                            adjustTasksHeight();
+                            // 保存更改
+                            scheduleAutoSave();
+                        }
+                    });
+                    
+                    task.appendChild(deleteBtn);
+                }
+            });
+            
+            // 为初始检查项添加删除按钮
+            const checklistItems = document.querySelectorAll('#dailyChecklist .checklist-item');
+            checklistItems.forEach(item => {
+                // 检查是否已有删除按钮
+                if (!item.querySelector('.delete-checklist-btn')) {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-checklist-btn';
+                    deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+                    deleteBtn.style.cssText = 'background: none; border: none; color: #ff6b6b; cursor: pointer; margin-left: 10px; font-size: 1.2rem;';
+                    
+                    deleteBtn.addEventListener('click', function() {
+                        if (confirm('确定要删除这个检查项吗？')) {
+                            item.remove();
+                            // 调整任务区域高度
+                            adjustTasksHeight();
+                            // 保存更改
+                            scheduleAutoSave();
+                        }
+                    });
+                    
+                    item.appendChild(deleteBtn);
+                }
+            });
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+        
+        // 页面卸载前自动保存一次
+        window.addEventListener('beforeunload', function() {
+            saveToLocalStorage();
+        });
+    </script>
+</body>
+</html>
