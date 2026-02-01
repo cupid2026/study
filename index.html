@@ -454,7 +454,18 @@
             background-color: white;
         }
         
-        /* 复选框区域 */
+        /* 复选框区域 - 新增每日检查标题样式 */
+        .daily-checklist-title {
+            color: #52c41a;
+            border-bottom: 2px solid #b7eb8f;
+            margin: 20px 0 15px;
+            padding-bottom: 8px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
         .checklist-item {
             display: flex;
             align-items: center;
@@ -643,6 +654,15 @@
         }
         
         .day-content.active {
+            display: block;
+        }
+        
+        /* 每日检查内容也按日隐藏显示 */
+        .checklist-day-content {
+            display: none;
+        }
+        
+        .checklist-day-content.active {
             display: block;
         }
         
@@ -881,28 +901,13 @@
                         <i class="fas fa-plus"></i> 添加重要任务
                     </button>
                     
-                    <h2 class="section-title"><i class="fas fa-list-alt"></i> 每日计划检查</h2>
-                    <div class="daily-checklist" id="dailyChecklist">
-                        <div class="checklist-item" id="checklist-item-1">
-                            <input type="checkbox" id="task1" checked>
-                            <input type="text" value="完成今日学习任务" placeholder="检查项内容">
-                        </div>
-                        <div class="checklist-item" id="checklist-item-2">
-                            <input type="checkbox" id="task2">
-                            <input type="text" value="进行体育锻炼" placeholder="检查项内容">
-                        </div>
-                        <div class="checklist-item" id="checklist-item-3">
-                            <input type="checkbox" id="task3">
-                            <input type="text" value="阅读30分钟以上" placeholder="检查项内容">
-                        </div>
-                        <div class="checklist-item" id="checklist-item-4">
-                            <input type="checkbox" id="task4">
-                            <input type="text" value="帮助家务劳动" placeholder="检查项内容">
-                        </div>
-                        <div class="checklist-item" id="checklist-item-5">
-                            <input type="checkbox" id="task5">
-                            <input type="text" value="记录今日收获" placeholder="检查项内容">
-                        </div>
+                    <!-- 每日计划检查区域 - 按日切换 -->
+                    <div class="daily-checklist-title">
+                        <span><i class="fas fa-list-alt"></i> 每日计划检查</span>
+                        <span id="currentChecklistDay" style="font-size: 1rem; color: #73d13d;">周一检查</span>
+                    </div>
+                    <div id="dailyChecklistContainer">
+                        <!-- 每日的检查清单将在这里动态生成 -->
                     </div>
                     
                     <button class="add-task-btn" id="addChecklistItemBtn">
@@ -929,7 +934,7 @@
         
         <footer>
             <p>© 2023 寒假计划时间表 | 马卡龙色系可编辑版本 | 半小时间隔 | 点击上方日期切换每日独立计划表</p>
-            <p>提示：每个日期都有独立的时间表，可以分别编辑和保存。按住Ctrl键选择时间段合并。</p>
+            <p>提示：每个日期都有独立的时间表和检查清单，可以分别编辑、勾选和保存。</p>
             <p>数据会自动保存在您的浏览器本地，下次打开页面时会自动加载。</p>
         </footer>
     </div>
@@ -967,6 +972,15 @@
         };
         
         const timeSlots = generateTimeSlots();
+        
+        // 默认每日检查项（每天都可以独立编辑）
+        const defaultChecklistItems = [
+            { text: "完成今日学习任务", checked: false },
+            { text: "进行体育锻炼", checked: false },
+            { text: "阅读30分钟以上", checked: false },
+            { text: "帮助家务劳动", checked: false },
+            { text: "记录今日收获", checked: false }
+        ];
         
         // 获取不同时间段的活动建议
         const getActivitySuggestion = (hour, minute, dayType) => {
@@ -1032,6 +1046,9 @@
         let selectedTimeSlots = [];
         let mergedGroups = {}; // 存储合并组的信息，key为day，value为合并组数组
         
+        // 每日检查项数据存储
+        let dailyChecklists = {};
+        
         // 自动保存相关变量
         let autoSaveTimer = null;
         let autoSaveDelay = 2000; // 2秒后自动保存
@@ -1061,7 +1078,7 @@
         }
         
         // 本地存储相关函数
-        const STORAGE_KEY = 'winter_holiday_schedule_v2';
+        const STORAGE_KEY = 'winter_holiday_schedule_v3'; // 版本更新
         
         // 保存数据到本地存储
         function saveToLocalStorage() {
@@ -1107,16 +1124,12 @@
                     importantTasks.push({ title, desc, icon, iconClass });
                 });
                 
-                // 收集检查项数据
-                const checklistItems = document.querySelectorAll('#dailyChecklist .checklist-item');
-                const checklist = [];
-                checklistItems.forEach(item => {
-                    const checkbox = item.querySelector('input[type="checkbox"]');
-                    const text = item.querySelector('input[type="text"]').value;
-                    checklist.push({ 
-                        checked: checkbox.checked, 
-                        text: text 
-                    });
+                // 收集每日检查项数据
+                const checklistData = {};
+                dayKeys.forEach(dayKey => {
+                    if (dailyChecklists[dayKey]) {
+                        checklistData[dayKey] = dailyChecklists[dayKey];
+                    }
                 });
                 
                 // 准备保存的数据对象
@@ -1125,7 +1138,7 @@
                     goals: goals,
                     schedule: schedule,
                     importantTasks: importantTasks,
-                    checklist: checklist,
+                    dailyChecklists: checklistData,
                     mergedGroups: mergedGroups,
                     lastSave: new Date().toISOString()
                 };
@@ -1172,8 +1185,10 @@
                     mergedGroups = data.mergedGroups;
                 }
                 
-                // 重要任务会在生成后通过applySavedData函数加载
-                // 检查项数据也会在生成后加载
+                // 加载每日检查项数据
+                if (data.dailyChecklists) {
+                    dailyChecklists = data.dailyChecklists;
+                }
                 
                 // 返回数据以便后续应用
                 return data;
@@ -1252,61 +1267,7 @@
                 });
             }
             
-            // 应用检查项数据
-            if (savedData.checklist && savedData.checklist.length > 0) {
-                const checklistContainer = document.getElementById('dailyChecklist');
-                
-                // 清空默认的检查项
-                checklistContainer.innerHTML = '';
-                
-                // 添加保存的检查项
-                savedData.checklist.forEach((item, index) => {
-                    const newItem = document.createElement('div');
-                    newItem.className = 'checklist-item';
-                    newItem.id = `checklist-item-${index + 1}`;
-                    newItem.innerHTML = `
-                        <input type="checkbox" id="task${index + 1}" ${item.checked ? 'checked' : ''}>
-                        <input type="text" value="${item.text || '新检查项'}" placeholder="检查项内容">
-                        <button class="delete-checklist-btn" style="background: none; border: none; color: #ff6b6b; cursor: pointer; margin-left: 10px; font-size: 1.2rem;">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `;
-                    
-                    checklistContainer.appendChild(newItem);
-                    
-                    // 设置复选框交互
-                    const checkbox = newItem.querySelector('input[type="checkbox"]');
-                    const textInput = newItem.querySelector('input[type="text"]');
-                    
-                    checkbox.addEventListener('change', function() {
-                        if (this.checked) {
-                            textInput.style.textDecoration = 'line-through';
-                            textInput.style.color = '#aaa';
-                        } else {
-                            textInput.style.textDecoration = 'none';
-                            textInput.style.color = '#444';
-                        }
-                        // 保存更改
-                        scheduleAutoSave();
-                    });
-                    
-                    // 初始化复选框状态
-                    if (item.checked) {
-                        textInput.style.textDecoration = 'line-through';
-                        textInput.style.color = '#aaa';
-                    }
-                    
-                    // 添加删除功能
-                    const deleteBtn = newItem.querySelector('.delete-checklist-btn');
-                    deleteBtn.addEventListener('click', function() {
-                        if (confirm('确定要删除这个检查项吗？')) {
-                            newItem.remove();
-                            // 保存更改
-                            scheduleAutoSave();
-                        }
-                    });
-                });
-            }
+            // 重要任务和检查项数据会在页面完全生成后应用
             
             // 调整任务区域高度
             adjustTasksHeight();
@@ -1344,8 +1305,14 @@
             // 初始化合并组存储
             mergedGroups = {};
             
+            // 初始化每日检查项数据
+            initializeDailyChecklists();
+            
             // 生成所有日期的计划表
             generateAllDayContents();
+            
+            // 生成所有日期的检查清单
+            generateAllDailyChecklists();
             
             // 从本地存储加载数据
             const savedData = loadFromLocalStorage();
@@ -1358,9 +1325,6 @@
             
             // 设置保存、打印和导出功能
             setupActionButtons();
-            
-            // 设置复选框交互
-            setupCheckboxes();
             
             // 设置输入框交互（包括自动保存）
             setupInputs();
@@ -1383,7 +1347,169 @@
             // 应用已保存的数据（在页面完全生成后）
             setTimeout(() => {
                 applySavedData(savedData);
+                // 应用已保存的每日检查项数据
+                applySavedChecklists(savedData);
             }, 100);
+        }
+        
+        // 初始化每日检查项数据
+        function initializeDailyChecklists() {
+            const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+            
+            dayKeys.forEach(dayKey => {
+                // 如果还没有该日期的检查项数据，使用默认值
+                if (!dailyChecklists[dayKey]) {
+                    dailyChecklists[dayKey] = JSON.parse(JSON.stringify(defaultChecklistItems));
+                }
+            });
+        }
+        
+        // 生成所有日期的检查清单
+        function generateAllDailyChecklists() {
+            const container = document.getElementById('dailyChecklistContainer');
+            container.innerHTML = '';
+            
+            const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+            
+            dayKeys.forEach(dayKey => {
+                const checklistContent = document.createElement('div');
+                checklistContent.className = 'checklist-day-content';
+                checklistContent.id = `checklist-${dayKey}`;
+                
+                // 设置默认检查项（如果还没有数据）
+                if (!dailyChecklists[dayKey]) {
+                    dailyChecklists[dayKey] = JSON.parse(JSON.stringify(defaultChecklistItems));
+                }
+                
+                // 生成检查项
+                let checklistHTML = '';
+                dailyChecklists[dayKey].forEach((item, index) => {
+                    const itemId = `checklist-${dayKey}-item-${index}`;
+                    checklistHTML += `
+                        <div class="checklist-item" id="${itemId}">
+                            <input type="checkbox" id="cb-${itemId}" ${item.checked ? 'checked' : ''}>
+                            <input type="text" value="${item.text}" placeholder="检查项内容">
+                            <button class="delete-checklist-btn" style="background: none; border: none; color: #ff6b6b; cursor: pointer; margin-left: 10px; font-size: 1.2rem;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                
+                checklistContent.innerHTML = checklistHTML;
+                container.appendChild(checklistContent);
+                
+                // 设置复选框交互
+                setupChecklistDayEvents(dayKey);
+            });
+            
+            // 默认显示周一的检查清单
+            document.getElementById('checklist-mon').classList.add('active');
+        }
+        
+        // 设置特定日期的检查清单事件
+        function setupChecklistDayEvents(dayKey) {
+            const checklistItems = document.querySelectorAll(`#checklist-${dayKey} .checklist-item`);
+            
+            checklistItems.forEach((item, index) => {
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                const textInput = item.querySelector('input[type="text"]');
+                const deleteBtn = item.querySelector('.delete-checklist-btn');
+                
+                // 初始化复选框状态
+                if (checkbox.checked) {
+                    textInput.style.textDecoration = 'line-through';
+                    textInput.style.color = '#aaa';
+                }
+                
+                // 复选框变化事件
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        textInput.style.textDecoration = 'line-through';
+                        textInput.style.color = '#aaa';
+                    } else {
+                        textInput.style.textDecoration = 'none';
+                        textInput.style.color = '#444';
+                    }
+                    
+                    // 更新数据
+                    dailyChecklists[dayKey][index].checked = this.checked;
+                    
+                    // 保存更改
+                    scheduleAutoSave();
+                });
+                
+                // 文本输入变化事件
+                textInput.addEventListener('input', function() {
+                    // 更新数据
+                    dailyChecklists[dayKey][index].text = this.value;
+                    
+                    // 保存更改
+                    scheduleAutoSave();
+                });
+                
+                // 删除按钮事件
+                deleteBtn.addEventListener('click', function() {
+                    if (confirm('确定要删除这个检查项吗？')) {
+                        // 从数据中移除
+                        dailyChecklists[dayKey].splice(index, 1);
+                        
+                        // 重新生成检查清单
+                        regenerateChecklistForDay(dayKey);
+                        
+                        // 保存更改
+                        scheduleAutoSave();
+                    }
+                });
+            });
+        }
+        
+        // 重新生成特定日期的检查清单
+        function regenerateChecklistForDay(dayKey) {
+            const checklistContent = document.getElementById(`checklist-${dayKey}`);
+            
+            // 生成新的检查项
+            let checklistHTML = '';
+            dailyChecklists[dayKey].forEach((item, index) => {
+                const itemId = `checklist-${dayKey}-item-${index}`;
+                checklistHTML += `
+                    <div class="checklist-item" id="${itemId}">
+                        <input type="checkbox" id="cb-${itemId}" ${item.checked ? 'checked' : ''}>
+                        <input type="text" value="${item.text}" placeholder="检查项内容">
+                        <button class="delete-checklist-btn" style="background: none; border: none; color: #ff6b6b; cursor: pointer; margin-left: 10px; font-size: 1.2rem;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            
+            checklistContent.innerHTML = checklistHTML;
+            
+            // 重新设置事件
+            setupChecklistDayEvents(dayKey);
+            
+            // 调整任务区域高度
+            adjustTasksHeight();
+        }
+        
+        // 应用已保存的每日检查项数据
+        function applySavedChecklists(savedData) {
+            if (!savedData || !savedData.dailyChecklists) return;
+            
+            // 更新每日检查项数据
+            Object.keys(savedData.dailyChecklists).forEach(dayKey => {
+                if (savedData.dailyChecklists[dayKey]) {
+                    dailyChecklists[dayKey] = savedData.dailyChecklists[dayKey];
+                }
+            });
+            
+            // 重新生成检查清单
+            const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+            dayKeys.forEach(dayKey => {
+                if (dailyChecklists[dayKey]) {
+                    regenerateChecklistForDay(dayKey);
+                }
+            });
         }
         
         // 生成所有日期的计划表
@@ -1777,21 +1903,21 @@
         function adjustTasksHeight() {
             const tasksScroll = document.querySelector('.tasks-scroll');
             const importantTasks = document.querySelector('.important-tasks');
-            const dailyChecklist = document.getElementById('dailyChecklist');
+            const activeChecklist = document.querySelector('.checklist-day-content.active');
             
-            if (importantTasks && dailyChecklist) {
+            if (importantTasks && activeChecklist) {
                 // 计算重要任务区域的高度
                 const importantTasksHeight = importantTasks.offsetHeight;
                 
-                // 计算每日检查区域的高度
-                const checklistHeight = dailyChecklist.offsetHeight;
+                // 计算当前检查区域的高度
+                const checklistHeight = activeChecklist.offsetHeight;
                 
                 // 计算按钮的高度
                 const buttonsHeight = document.getElementById('addImportantTaskBtn').offsetHeight + 
                                      document.getElementById('addChecklistItemBtn').offsetHeight + 30;
                 
                 // 计算标题的高度
-                const titlesHeight = 100;
+                const titlesHeight = 120;
                 
                 // 设置任务区域的最小高度
                 const totalHeight = importantTasksHeight + checklistHeight + buttonsHeight + titlesHeight;
@@ -1803,6 +1929,7 @@
         function setupDayNavigation() {
             const dayTabs = document.querySelectorAll('.day-tab');
             const dayContents = document.querySelectorAll('.day-content');
+            const checklistContents = document.querySelectorAll('.checklist-day-content');
             
             dayTabs.forEach(tab => {
                 tab.addEventListener('click', function() {
@@ -1812,20 +1939,32 @@
                     dayTabs.forEach(t => t.classList.remove('active'));
                     this.classList.add('active');
                     
-                    // 显示对应的内容
+                    // 显示对应的时间表内容
                     dayContents.forEach(content => {
                         content.classList.remove('active');
                     });
                     document.getElementById(`day-${dayKey}`).classList.add('active');
                     
+                    // 显示对应的检查清单内容
+                    checklistContents.forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(`checklist-${dayKey}`).classList.add('active');
+                    
                     // 更新当前日期指示器
                     updateCurrentDayIndicator(dayKey);
+                    
+                    // 更新检查清单标题
+                    document.getElementById('currentChecklistDay').textContent = `${weekDays[dayKey].name}检查`;
                     
                     // 清除选择
                     clearSelection();
                     
                     // 调整时间表区域高度
                     adjustTimelineHeight();
+                    
+                    // 调整任务区域高度
+                    adjustTasksHeight();
                     
                     // 更新合并控制面板
                     updateMergeControls();
@@ -1876,9 +2015,13 @@
                             .print-table th { background-color: #f9f9f9; }
                             .time-col { width: 120px; font-weight: bold; color: #ff6b8b; }
                             .merged-row { background-color: #f6ffed !important; }
+                            .checklist-table { width: 100%; border-collapse: collapse; margin-top: 30px; }
+                            .checklist-table th, .checklist-table td { border: 1px solid #ddd; padding: 10px; }
+                            .checklist-table th { background-color: #f6ffed; }
+                            .completed { text-decoration: line-through; color: #aaa; }
                             @media print {
                                 body { font-size: 12pt; }
-                                .print-table { font-size: 11pt; }
+                                .print-table, .checklist-table { font-size: 11pt; }
                             }
                         </style>
                     </head>
@@ -1886,6 +2029,7 @@
                         <h1>${dayInfo.fullName}计划表</h1>
                         <p><strong>姓名：</strong>${document.getElementById('userName').value}</p>
                         <p><strong>日期：</strong>${new Date().toLocaleDateString()}</p>
+                        <h2>时间安排</h2>
                         <table class="print-table">
                             <tr>
                                 <th>时间</th>
@@ -1948,8 +2092,33 @@
                     }
                 });
                 
-                printContent += `
+                // 添加每日检查清单
+                if (dailyChecklists[activeDay]) {
+                    printContent += `
                         </table>
+                        <h2>每日检查清单</h2>
+                        <table class="checklist-table">
+                            <tr>
+                                <th>状态</th>
+                                <th>检查项</th>
+                            </tr>
+                    `;
+                    
+                    dailyChecklists[activeDay].forEach(item => {
+                        const status = item.checked ? '✓' : '○';
+                        const textClass = item.checked ? 'class="completed"' : '';
+                        printContent += `
+                            <tr>
+                                <td style="text-align: center; font-size: 1.2rem;">${status}</td>
+                                <td ${textClass}>${item.text}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    printContent += `</table>`;
+                }
+                
+                printContent += `
                         <script>
                             window.onload = function() {
                                 window.print();
@@ -1975,7 +2144,7 @@
                     goals: {},
                     schedule: {},
                     importantTasks: [],
-                    dailyChecklist: [],
+                    dailyChecklists: dailyChecklists,
                     mergedTasks: mergedGroups // 包含合并任务信息
                 };
                 
@@ -2020,17 +2189,6 @@
                     allData.importantTasks.push({ title, desc, icon, iconClass });
                 });
                 
-                // 收集检查项数据
-                const checklistItems = document.querySelectorAll('#dailyChecklist .checklist-item');
-                checklistItems.forEach(item => {
-                    const checkbox = item.querySelector('input[type="checkbox"]');
-                    const text = item.querySelector('input[type="text"]').value;
-                    allData.dailyChecklist.push({ 
-                        checked: checkbox.checked, 
-                        text: text 
-                    });
-                });
-                
                 // 将数据导出为JSON文件
                 const dataStr = JSON.stringify(allData, null, 2);
                 const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
@@ -2054,33 +2212,6 @@
             
             // 清除所有数据功能
             document.getElementById('clearBtn').addEventListener('click', clearLocalStorage);
-        }
-        
-        // 设置复选框交互
-        function setupCheckboxes() {
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    const textInput = this.parentElement.querySelector('input[type="text"]');
-                    if (this.checked) {
-                        textInput.style.textDecoration = 'line-through';
-                        textInput.style.color = '#aaa';
-                    } else {
-                        textInput.style.textDecoration = 'none';
-                        textInput.style.color = '#444';
-                    }
-                    
-                    // 保存更改
-                    scheduleAutoSave();
-                });
-                
-                // 初始化已勾选的复选框状态
-                if (checkbox.checked) {
-                    const textInput = checkbox.parentElement.querySelector('input[type="text"]');
-                    textInput.style.textDecoration = 'line-through';
-                    textInput.style.color = '#aaa';
-                }
-            });
         }
         
         // 设置输入框交互
@@ -2179,53 +2310,22 @@
             
             // 添加检查项
             document.getElementById('addChecklistItemBtn').addEventListener('click', function() {
-                const checklistContainer = document.getElementById('dailyChecklist');
-                const itemCount = checklistContainer.children.length + 1;
+                const activeDay = document.querySelector('.day-tab.active').getAttribute('data-day');
                 
-                const newItem = document.createElement('div');
-                newItem.className = 'checklist-item';
-                newItem.id = `checklist-item-${itemCount}`;
-                newItem.innerHTML = `
-                    <input type="checkbox" id="task${itemCount}">
-                    <input type="text" value="新检查项" placeholder="检查项内容">
-                    <button class="delete-checklist-btn" style="background: none; border: none; color: #ff6b6b; cursor: pointer; margin-left: 10px; font-size: 1.2rem;">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
+                // 创建新的检查项
+                const newItem = {
+                    text: "新检查项",
+                    checked: false
+                };
                 
-                checklistContainer.appendChild(newItem);
+                // 添加到数据
+                if (!dailyChecklists[activeDay]) {
+                    dailyChecklists[activeDay] = [];
+                }
+                dailyChecklists[activeDay].push(newItem);
                 
-                // 设置复选框交互
-                const checkbox = newItem.querySelector('input[type="checkbox"]');
-                const textInput = newItem.querySelector('input[type="text"]');
-                
-                checkbox.addEventListener('change', function() {
-                    if (this.checked) {
-                        textInput.style.textDecoration = 'line-through';
-                        textInput.style.color = '#aaa';
-                    } else {
-                        textInput.style.textDecoration = 'none';
-                        textInput.style.color = '#444';
-                    }
-                    // 保存更改
-                    scheduleAutoSave();
-                });
-                
-                // 添加输入事件，触发自动保存
-                textInput.addEventListener('input', scheduleAutoSave);
-                
-                // 添加删除功能
-                const deleteBtn = newItem.querySelector('.delete-checklist-btn');
-                deleteBtn.addEventListener('click', function() {
-                    if (confirm('确定要删除这个检查项吗？')) {
-                        newItem.remove();
-                        // 保存更改
-                        scheduleAutoSave();
-                    }
-                });
-                
-                // 调整任务区域高度
-                adjustTasksHeight();
+                // 重新生成检查清单
+                regenerateChecklistForDay(activeDay);
                 
                 // 保存更改
                 scheduleAutoSave();
@@ -2255,30 +2355,6 @@
                     });
                     
                     task.appendChild(deleteBtn);
-                }
-            });
-            
-            // 为初始检查项添加删除按钮
-            const checklistItems = document.querySelectorAll('#dailyChecklist .checklist-item');
-            checklistItems.forEach(item => {
-                // 检查是否已有删除按钮
-                if (!item.querySelector('.delete-checklist-btn')) {
-                    const deleteBtn = document.createElement('button');
-                    deleteBtn.className = 'delete-checklist-btn';
-                    deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
-                    deleteBtn.style.cssText = 'background: none; border: none; color: #ff6b6b; cursor: pointer; margin-left: 10px; font-size: 1.2rem;';
-                    
-                    deleteBtn.addEventListener('click', function() {
-                        if (confirm('确定要删除这个检查项吗？')) {
-                            item.remove();
-                            // 调整任务区域高度
-                            adjustTasksHeight();
-                            // 保存更改
-                            scheduleAutoSave();
-                        }
-                    });
-                    
-                    item.appendChild(deleteBtn);
                 }
             });
         }
